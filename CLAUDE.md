@@ -20,6 +20,7 @@
 - Claude commits only when the learner asks, and never pushes unless asked; otherwise the learner commits (commands are given in each checkpoint).
 - When a lesson creates a new folder or file, show the **complete folder tree** (repo or module root down to each new file, with new and changed items marked) **and every file complete**. (Learner's request, 2026-10-17.)
 - **More code, short story** (learner's request, 2026-10-17): story 2–3 lines; concept notes one line, preferably as code comments; Why = up to 6 one-line bullets; Run = commands plus key output only; review = one line per finding (`file:line`: problem → fix). Cut words, never code.
+- **Bigger lessons** (learner's request, 2026-10-17: "the code is too small"): the ~10-file cap is relaxed. Each lesson delivers a complete, runnable slice (typically 20–30 files). Split into Part A / Part B only when a slice would exceed ~30 files.
 - Learner's machines: Windows 11 laptop (Intel i5-6300U, 2 cores / 4 threads, 7.9 GB RAM) now; a Mac later, cloned from Git. Hardware is small: keep Docker profiles lean and run only the services a lesson needs.
 
 ---
@@ -272,6 +273,7 @@ services/transfer-service/
     │   │   ├── out/persistence/     # JPA entities, repositories, adapters, mappers
     │   │   ├── out/grpc/            # gRPC clients
     │   │   ├── out/messaging/       # outbox writer and relay
+    │   │   ├── out/security/        # crypto adapters: password hashing, token signing (added 2026-10-17, L04)
     │   │   └── out/external/        # provider HTTP clients (rail service only)
     │   └── config/                  # Spring @Configuration classes only
     └── main/resources/

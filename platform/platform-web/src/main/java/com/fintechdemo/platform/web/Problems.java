@@ -20,9 +20,9 @@ public final class Problems {
     }
 
     public static ProblemDetail withCorrelationId(ProblemDetail problem) {
-        String correlationId = MDC.get(correlationIdFilter.MDC_KEY);
-        if(correlationId != null) {
-            problem.setProperty("corrolationId", correlationId);
+        String correlationId = MDC.get(CorrelationIdFilter.MDC_KEY);
+        if (correlationId != null) {
+            problem.setProperty("correlationId", correlationId);
         }
         return problem;
     }

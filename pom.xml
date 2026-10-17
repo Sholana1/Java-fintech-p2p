@@ -25,15 +25,18 @@
         <module>platform/platform-money</module>
         <module>platform/platform-observability</module>
         <module>platform/platform-web</module>
+        <module>services/identity-service</module>
     </modules>
 
     <properties>
         <java.version>25</java.version>
         <required.java.range>[25,26)</required.java.range>
         <required.maven.range>[3.9.9,)</required.maven.range>
+        <!-- Not managed by Spring Boot: pinned here (see ADR-0001). -->
+        <bouncycastle.version>1.86</bouncycastle.version>
     </properties>
 
-    <!-- Our own modules: services declare them without a version. -->
+    <!-- Versions for our own modules and for libraries Boot does not manage: modules then omit <version>. -->
     <dependencyManagement>
         <dependencies>
             <dependency>
@@ -50,6 +53,12 @@
                 <groupId>com.fintechdemo</groupId>
                 <artifactId>platform-web</artifactId>
                 <version>${project.version}</version>
+            </dependency>
+            <!-- Argon2 password hashing in Spring Security needs Bouncy Castle. -->
+            <dependency>
+                <groupId>org.bouncycastle</groupId>
+                <artifactId>bcprov-jdk18on</artifactId>
+                <version>${bouncycastle.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

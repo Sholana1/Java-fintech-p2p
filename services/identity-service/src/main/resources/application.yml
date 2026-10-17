@@ -1,0 +1,27 @@
+spring:
+  application:
+    name: identity-service
+  # Local dev: read SERVICE_DB_PASSWORD from the repo's git-ignored .env (paths are relative to this module).
+  config:
+    import: optional:file:../../.env[.properties]
+  threads:
+    virtual:
+      enabled: true
+  datasource:
+    url: jdbc:postgresql://localhost:5432/identity
+    # Runtime role: data only (SELECT, INSERT, UPDATE). It cannot create, alter or drop tables.
+    username: identity_app
+    password: ${SERVICE_DB_PASSWORD}
+    hikari:
+      maximum-pool-size: 10
+  flyway:
+    # Migration role: owns the schema. Used only by Flyway at startup.
+    user: identity_owner
+    password: ${SERVICE_DB_PASSWORD}
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+
+server:
+  port: 8081
