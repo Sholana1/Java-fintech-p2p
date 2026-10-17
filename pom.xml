@@ -24,6 +24,7 @@
     <modules>
         <module>platform/platform-money</module>
         <module>platform/platform-observability</module>
+        <module>platform/platform-web</module>
     </modules>
 
     <properties>
@@ -43,6 +44,11 @@
             <dependency>
                 <groupId>com.fintechdemo</groupId>
                 <artifactId>platform-observability</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fintechdemo</groupId>
+                <artifactId>platform-web</artifactId>
                 <version>${project.version}</version>
             </dependency>
         </dependencies>

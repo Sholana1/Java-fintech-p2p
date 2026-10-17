@@ -6,9 +6,10 @@ Claude updates this file after every step. Legend: ✅ done · 🟡 in progress 
 ## Next step
 
 0. ⏸ **Blocker: Docker can't start on the Windows laptop.** Docker's log says `Virtual Machine Platform not enabled`; BIOS virtualization is ON. Fix: in an admin PowerShell, run `dism.exe /online /enable-feature /featurename:VirtualMachinePlatform /all /norestart`, then restart Windows (source: https://learn.microsoft.com/en-us/windows/wsl/install-manual, Step 3). VirtualBox and Vagrant are installed: if the feature was turned off for VirtualBox, VirtualBox 7 can run alongside it but more slowly.
-1. ⏸ **Build is broken**: `InvalidAmountException.java:6` is missing `;` after `super(message, cause)`. Fix it, then run `mvn verify`.
-2. ⏸ Still open: ADR-0002 missing, Maven wrapper not generated, no Git remote / push.
-3. ⏸ Learner types **NEXT**. Claude reviews, then teaches **L03: error model, validation, problem+json** in `platform/platform-web`, with **no test files** (see Decisions, 2026-10-17 T1).
+1. ⏸ Learner types the 7 files of **L03** (`docs/lessons/L03-error-model-problem-json.md`), runs `mvn verify`, and commits (including the uncommitted `InvalidAmountException` fix).
+2. ⏸ Still open: replace both module POMs (L03 Appendix), ADR-0002, Maven wrapper, Git remote / push.
+3. ⏸ **Before L04: Docker must work** (L04 needs Postgres). Run the admin `dism … VirtualMachinePlatform` command and restart.
+4. ⏸ Learner types **NEXT**. Claude reviews, then teaches **L04 Part A** (identity-service skeleton, register, password hashing).
 
 ## Open questions (waiting for learner)
 
@@ -39,8 +40,8 @@ Claude updates this file after every step. Legend: ✅ done · 🟡 in progress 
 | --- | --- | --- | --- |
 | L01A | Monorepo, parent POM, Maven wrapper, docker-compose, Postgres init, ADR-0001, ADR-0002 | 🟡 committed (05bc70a), fixes pending | Reviewed 2026-10-17: 8 files exact ✅. Pending: `.gitattributes` is empty, ADR-0002 missing, wrapper not generated, not pushed. Docker checks not yet run |
 | L01B | JSON logs, correlation ID, OpenTelemetry (platform-observability) | ✅ 7 source files typed (identical), committed; test files dropped per T1 | Verified in scratchpad: 9/9 tests green; Break it gives 2 failures as designed |
-| L02 | Money value object (kobo, rounding) | 🟡 typed and committed, **build broken** (missing `;` in `InvalidAmountException.java:6`) | `Money.java` identical ✅. Javadoc comments omitted in 3 files (fine). `platform-money/pom.xml` starts with a blank line before `<?xml` (invalid XML; Maven tolerates it) and still has junit/assertj test deps (unneeded under T1). Tests dropped per T1 | `platform/platform-money`: Money record (long minor units + Currency enum NGN/USD), ofMajor/toMajor, plus/minus with addExact, times(rate, RoundingMode), comparisons. Verified in scratchpad: 18/18 tests green, full build green, Break it (new BigDecimal(0.1) rejected) verified |
-| L03 | Error model, validation, problem+json | ⬜ | |
+| L02 | Money value object (kobo, rounding) | ✅ typed; `;` fix done (uncommitted); build green. POM cleanup pending | `Money.java` identical ✅. Javadoc comments omitted in 3 files (fine). `platform-money/pom.xml` starts with a blank line before `<?xml` (invalid XML; Maven tolerates it) and still has junit/assertj test deps (unneeded under T1). Tests dropped per T1 | `platform/platform-money`: Money record (long minor units + Currency enum NGN/USD), ofMajor/toMajor, plus/minus with addExact, times(rate, RoundingMode), comparisons. Verified in scratchpad: 18/18 tests green, full build green, Break it (new BigDecimal(0.1) rejected) verified |
+| L03 | Error model, validation, problem+json | 🟡 presented, learner typing | `platform/platform-web`: Problems factory (type URI `https://fintechdemo.example/problems/<slug>`, correlationId), FieldViolation, GlobalExceptionHandler (lowest precedence; generic 500; validation errors list; correlationId on Spring's built-in errors), auto-config. Verified in scratchpad with 7 scratchpad-only checks: validation, invalid amount, 500 leaks nothing, malformed JSON, 404, a service advice beats the catch-all even without @Order |
 | L04 | Register, login, password hashing, JWT + refresh rotation | ⬜ | |
 | L05 | Device binding, transaction PIN, lockout, PIN-verify gRPC | ⬜ | See design flag F1 |
 | L06 | API gateway: JWT check, rate limiting, routing | ⬜ | Choose Gateway Server WebMVC vs WebFlux |
