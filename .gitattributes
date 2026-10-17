@@ -1,0 +1,17 @@
+# Store every text file with LF line endings, so Windows and macOS see identical files.
+* text=auto eol=lf
+
+# Windows-only scripts keep CRLF.
+*.cmd text eol=crlf
+*.bat text eol=crlf
+*.ps1 text eol=crlf
+
+# Shell scripts must be LF or they break inside Linux containers.
+mvnw text eol=lf
+*.sh text eol=lf
+
+# Binary files: never touch them.
+*.jar binary
+*.png binary
+*.jpg binary
+*.p12 binary

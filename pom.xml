@@ -20,8 +20,10 @@
     <name>fintechdemo-parent</name>
     <description>FINTECHDEMO P2P payments core - parent POM: modules, versions, plugins only</description>
 
-    <!-- Modules are added lesson by lesson (platform/platform-money arrives in L02). -->
+    <!-- Modules are added lesson by lesson. -->
     <modules>
+        <module>platform/platform-money</module>
+        <module>platform/platform-observability</module>
     </modules>
 
     <properties>
@@ -29,6 +31,22 @@
         <required.java.range>[25,26)</required.java.range>
         <required.maven.range>[3.9.9,)</required.maven.range>
     </properties>
+
+    <!-- Our own modules: services declare them without a version. -->
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>com.fintechdemo</groupId>
+                <artifactId>platform-money</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fintechdemo</groupId>
+                <artifactId>platform-observability</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <build>
         <plugins>

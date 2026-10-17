@@ -15,13 +15,16 @@
 
 - The learner types all source code. Claude does not write project source files.
 - Claude **may** write and update these tracking files without asking each time: `CLAUDE.md`, `docs/PROGRESS.md`, `docs/lessons/*.md`. (The learner asked for every step, done and not done, to be saved so the work survives a move to the Mac.)
-- Claude verifies lesson code in its own scratchpad (build, tests, containers) before presenting it, and says plainly what it could not verify.
-- Claude does not commit or push; the learner does (commands are given in each checkpoint).
+- **No automated test code in the project** (learner's decision, 2026-10-17). Lessons contain no JUnit/Mockito/AssertJ/Testcontainers test files and no test dependencies for new modules. To keep "never claim it works unless verified", Claude still writes and runs its own tests **in its scratchpad** before every lesson and shows the results; "Break it" becomes a hands-on experiment (run the app, curl, psql, jshell), not a test file. Kept: k6 load measurement (L22) and failure drills (L33, L40), because they measure and demonstrate rather than add test code.
+- Claude verifies lesson code in its own scratchpad (build, scratchpad tests, containers) before presenting it, and says plainly what it could not verify.
+- Claude commits only when the learner asks, and never pushes unless asked; otherwise the learner commits (commands are given in each checkpoint).
+- When a lesson creates a new folder or file, show the **complete folder tree** (repo or module root down to each new file, with new and changed items marked) **and every file complete**. (Learner's request, 2026-10-17.)
+- **More code, short story** (learner's request, 2026-10-17): story 2–3 lines; concept notes one line, preferably as code comments; Why = up to 6 one-line bullets; Run = commands plus key output only; review = one line per finding (`file:line`: problem → fix). Cut words, never code.
 - Learner's machines: Windows 11 laptop (Intel i5-6300U, 2 cores / 4 threads, 7.9 GB RAM) now; a Mac later, cloned from Git. Hardware is small: keep Docker profiles lean and run only the services a lesson needs.
 
 ---
 
-# Master prompt (verbatim, from the learner)
+# Master prompt (from the learner; amended 2026-10-17: automated test code removed from the build)
 
 # FINTECHDEMO — PRODUCTION-GRADE HIGH-SPEED P2P PAYMENTS
 
@@ -77,7 +80,6 @@ Teaching rules:
 - `domain` code is plain Java: no Spring, no JPA annotations.
 - JPA entities never leave the persistence adapter. API DTOs never enter the domain. Mappers convert between them.
 - Constructor injection only. Java records for DTOs, commands, events and value objects.
-- Tests mirror the main packages. Unit tests for domain and application; Testcontainers integration tests for adapters.
 
 Naming conventions (strict):
 
@@ -96,7 +98,6 @@ Naming conventions (strict):
 | Domain exception | `<Reason>Exception` | `InsufficientFundsException` |
 | Event | `<Thing><PastTense>Event` | `TransferCompletedEvent` |
 | Flyway migration | `V<n>__<verb>_<noun>.sql` | `V3__create_journal_entries.sql` |
-| Tests | `<Class>Test`, `<Class>IT` | `PostingServiceTest` |
 
 ---
 
@@ -167,7 +168,7 @@ Hot-path rules:
 - **No float or double.** Money is a value object holding `long` minor units (kobo) plus currency. Use BigDecimal only at API edges and for rate/percentage maths, with an explicit rounding mode. Store amounts as BIGINT kobo. Explain this trade-off to me.
 - **DB constraints are the last line of defence:** unique transaction reference, `CHECK (available_balance >= 0)` for non-overdraft accounts, foreign keys, NOT NULL.
 - **Idempotency:** a durable key table with a request fingerprint. Same key + same body → replay the stored response. Same key + different body → 422. Still in progress → 409.
-- **A customer can never spend the same balance twice.** Prove it with a concurrency test (for example, 200 parallel debits on one account).
+- **A customer can never spend the same balance twice.** Prove it with a concurrency demo (for example, 200 parallel debits on one account), run and shown in the lesson.
 - Internal P2P is final. Never auto-reverse it; disputes go through the ops workflow.
 - External transfers use an explicit state machine:
   - `CREATED → VALIDATED → FUNDS_RESERVED → PROCESSING → SUCCESSFUL | FAILED | UNKNOWN`
@@ -273,10 +274,9 @@ services/transfer-service/
     │   │   ├── out/messaging/       # outbox writer and relay
     │   │   └── out/external/        # provider HTTP clients (rail service only)
     │   └── config/                  # Spring @Configuration classes only
-    ├── main/resources/
-    │   ├── application.yml
-    │   └── db/migration/            # Flyway V<n>__*.sql
-    └── test/java/com/fintechdemo/transfer/   # mirrors main, plus it/ for Testcontainers
+    └── main/resources/
+        ├── application.yml
+        └── db/migration/            # Flyway V<n>__*.sql
 ```
 
 Rule: every new file goes into one of these folders. No new top-level folder without an ADR.
@@ -291,7 +291,7 @@ Rule: every new file goes into one of these folders. No new top-level folder wit
 - PostgreSQL, Flyway, HikariCP
 - Redis, Apache Kafka
 - Resilience4j; Quartz or Spring Scheduling with ShedLock
-- JUnit 5, Mockito, AssertJ, Testcontainers, k6
+- k6 (load measurement only; no automated test code in the project)
 - Docker, Docker Compose, GitHub Actions; Terraform and AWS later
 - SLF4J + Logback JSON logs, Micrometer, Prometheus, Grafana, OpenTelemetry (from Lesson 01, not at the end)
 
@@ -319,7 +319,7 @@ Integrations: Flutterwave (transfers, account resolve, virtual accounts, webhook
 
 **Phase 0 — Ground**
 - L01 Monorepo, parent POM, docker-compose, ADR-0001 versions, SLOs, JSON logs + correlation ID
-- L02 Money value object (kobo, rounding) + tests
+- L02 Money value object (kobo, rounding)
 - L03 Error model, validation, problem+json responses
 
 **Phase 1 — Identity (just enough for P2P)**
@@ -331,7 +331,7 @@ Integrations: Flutterwave (transfers, account resolve, virtual accounts, webhook
 - L07 Accounts, account number with NUBAN-style check digit, balance fields
 - L08 Double-entry journal model + append-only tables
 - L09 Atomic posting engine: guarded updates, lock ordering, idempotent reference
-- L10 Concurrency proof: 200 parallel debits, deadlock demo and fix, isolation levels
+- L10 Concurrency proof (demo): 200 parallel debits, deadlock demo and fix, isolation levels
 - L11 Holds: reserve, capture, release
 - L12 Hot-account problem: sharded system accounts + benchmark
 - L13 Ledger gRPC API with deadlines and error mapping

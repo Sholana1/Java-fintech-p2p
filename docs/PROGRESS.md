@@ -6,17 +6,17 @@ Claude updates this file after every step. Legend: ✅ done · 🟡 in progress 
 ## Next step
 
 0. ⏸ **Blocker: Docker can't start on the Windows laptop.** Docker's log says `Virtual Machine Platform not enabled`; BIOS virtualization is ON. Fix: in an admin PowerShell, run `dism.exe /online /enable-feature /featurename:VirtualMachinePlatform /all /norestart`, then restart Windows (source: https://learn.microsoft.com/en-us/windows/wsl/install-manual, Step 3). VirtualBox and Vagrant are installed: if the feature was turned off for VirtualBox, VirtualBox 7 can run alongside it but more slowly.
-1. ⏸ Learner types the 10 files of **L01 Part A** (`docs/lessons/L01A-monorepo-and-local-infrastructure.md`), generates the Maven wrapper, runs the checks, then commits and pushes.
-2. ⏸ Learner answers the open questions below.
-3. ⏸ Learner types **NEXT**. Claude then reviews the L01A files in the repo and teaches **L01 Part B** (JSON logs, correlation ID and OpenTelemetry tracing in `platform/platform-observability`).
+1. ⏸ **Build is broken**: `InvalidAmountException.java:6` is missing `;` after `super(message, cause)`. Fix it, then run `mvn verify`.
+2. ⏸ Still open: ADR-0002 missing, Maven wrapper not generated, no Git remote / push.
+3. ⏸ Learner types **NEXT**. Claude reviews, then teaches **L03: error model, validation, problem+json** in `platform/platform-web`, with **no test files** (see Decisions, 2026-10-17 T1).
 
 ## Open questions (waiting for learner)
 
 | # | Question | Claude's recommendation |
 | --- | --- | --- |
-| Q1 | Throughput target in ADR-0002: 50 TPS sustained / 100 TPS spike on the Windows laptop. Accept or change? | Accept now, re-baseline in L22 and again on the Mac |
-| Q2 | Accept the 7 architecture changes proposed on 2026-10-17 (see Decisions)? | Accept |
-| Q3 | No Git remote yet. Create a **private** GitHub repo and push, so the Mac can clone it. | Do it at the end of L01A |
+| Q1 | Throughput target in ADR-0002: 50 TPS sustained / 100 TPS spike on the Windows laptop. Accept or change? | Not answered; the recommendation stands by default (2026-10-17). Re-baseline in L22 and again on the Mac |
+| Q2 | Accept the 7 architecture changes proposed on 2026-10-17 (see Decisions)? | Not answered; the recommendation stands by default. L01B already uses C5 |
+| Q3 | No Git remote yet. Create a **private** GitHub repo and push, so the Mac can clone it. | Still open after L01A. Do it at the end of L01B |
 
 ## Decisions
 
@@ -31,14 +31,15 @@ Claude updates this file after every step. Legend: ✅ done · 🟡 in progress 
 | 2026-10-17 | C5: Correlation ID lives in `platform-observability`, not `platform-web`, because it must cross HTTP, gRPC and Kafka. `platform-web` keeps the error model and validation | Proposed (Q2) | L01B |
 | 2026-10-17 | C6: Kafka in KRaft mode (Kafka 4 has no ZooKeeper), topic auto-create off | Proposed (Q2) | `docker-compose.yml` |
 | 2026-10-17 | C7: Every port binds to 127.0.0.1; dev secrets come from a git-ignored `.env` | Proposed (Q2) | `docker-compose.yml`, `.env.example` |
+| 2026-10-17 | **T1: No automated test code in the project** (learner's decision). Claude still verifies every lesson with its own scratchpad tests and shows the results. "Break it" becomes a hands-on experiment. k6 (L22) and the failure drills (L33, L40) stay. Claude's risk note: without in-repo tests there is no regression safety net, and "prove no double spend" relies on demos; this can be reversed any time | Accepted (learner) | `CLAUDE.md` working agreement + master prompt amended |
 
 ## Lesson status
 
 | # | Lesson | Status | Notes |
 | --- | --- | --- | --- |
-| L01A | Monorepo, parent POM, Maven wrapper, docker-compose, Postgres init, ADR-0001, ADR-0002 | 🟡 presented, learner typing | Verified by Claude in its scratchpad on 2026-10-17 (see session log) |
-| L01B | JSON logs, correlation ID, OpenTelemetry (platform-observability) | ⬜ | |
-| L02 | Money value object (kobo, rounding) + tests | ⬜ | |
+| L01A | Monorepo, parent POM, Maven wrapper, docker-compose, Postgres init, ADR-0001, ADR-0002 | 🟡 committed (05bc70a), fixes pending | Reviewed 2026-10-17: 8 files exact ✅. Pending: `.gitattributes` is empty, ADR-0002 missing, wrapper not generated, not pushed. Docker checks not yet run |
+| L01B | JSON logs, correlation ID, OpenTelemetry (platform-observability) | ✅ 7 source files typed (identical), committed; test files dropped per T1 | Verified in scratchpad: 9/9 tests green; Break it gives 2 failures as designed |
+| L02 | Money value object (kobo, rounding) | 🟡 typed and committed, **build broken** (missing `;` in `InvalidAmountException.java:6`) | `Money.java` identical ✅. Javadoc comments omitted in 3 files (fine). `platform-money/pom.xml` starts with a blank line before `<?xml` (invalid XML; Maven tolerates it) and still has junit/assertj test deps (unneeded under T1). Tests dropped per T1 | `platform/platform-money`: Money record (long minor units + Currency enum NGN/USD), ofMajor/toMajor, plus/minus with addExact, times(rate, RoundingMode), comparisons. Verified in scratchpad: 18/18 tests green, full build green, Break it (new BigDecimal(0.1) rejected) verified |
 | L03 | Error model, validation, problem+json | ⬜ | |
 | L04 | Register, login, password hashing, JWT + refresh rotation | ⬜ | |
 | L05 | Device binding, transaction PIN, lockout, PIN-verify gRPC | ⬜ | See design flag F1 |
@@ -142,3 +143,8 @@ Claude's local memory stays on the Windows machine. Everything that matters is i
   - L01A verified in Claude's scratchpad: ✅ Maven wrapper generated (3.3.4, only-script, Maven 3.10.0); ✅ `mvnw validate` BUILD SUCCESS from Git Bash and PowerShell, all 3 enforcer rules pass; ✅ enforcer fails with our message on a wrong JDK range; ✅ `docker compose config` valid, and fails clearly without `.env`.
   - Checked against official sources, not run: `REDISCLI_AUTH` (redis.io), explicitly targeted profiled services start (docs.docker.com), the Kafka image creates `/var/lib/kafka/data` owned by `appuser`, and `KAFKA_HEAP_OPTS` is not turned into a broker property (apache/kafka source).
   - ⚠️ NOT verified (Docker engine down): containers starting and becoming healthy, the Postgres init SQL (`\getenv`, `\gexec`, roles, REVOKE), Kafka startup, Grafana UI. Claude runs these on the learner's real repo after NEXT.
+- **2026-10-17 (later)**: The learner committed L01A (`05bc70a`) and typed NEXT. The learner's new standing rule: always show the complete folder tree and every file in full (saved in CLAUDE.md). Review: 8 files identical to the verified versions; `.gitattributes` empty; ADR-0002, the Maven wrapper and the remote are missing; Docker is still blocked (no restart). Q1/Q2 unanswered, so the defaults stand.
+  - L01B built and verified in scratchpad: `mvnw verify` → 9 tests, 0 failures. Real output line: `"message":"ping received","traceId":"…","spanId":"…","correlationId":"tolu-retry-0001"`. Boot 4.1.1 facts checked in the jars: `org.springframework.boot.EnvironmentPostProcessor` is the current interface and spring.factories key (the `org.springframework.boot.env.` one still exists for compatibility); `FilterRegistrationBean` is in `spring-boot` (`org.springframework.boot.web.servlet`); `AutoConfigureMockMvc` is in `spring-boot-webmvc-test` (`org.springframework.boot.webmvc.test.autoconfigure`); `spring-boot-starter-opentelemetry` brings `micrometer-registry-otlp`, the OTel tracing bridge and the OTLP exporter.
+  - The learner asked for "more code, short story" (saved in CLAUDE.md). The learner typed NEXT. Review: the 7 L01B main files are identical and `mvn verify` passes, but the 3 L01B tests are missing; `.gitattributes`, ADR-0002, the wrapper, the commit and the remote are still pending. Docker is still blocked. L02 presented (short format).
+  - The learner asked Claude to remove tests from the build in CLAUDE.md and commit all changes. Claude amended CLAUDE.md (working agreement plus master prompt §3, naming table, §6, §8 layout, §9 stack, roadmap L02/L10), recorded decision T1, and committed on `main`. The commit includes L02 with a known compile error (reported to the learner).
+  - Noted for later lessons: tracing is active in `@SpringBootTest` (trace IDs appear in test logs). The OTLP metrics registry logs "Publishing metrics … every 1m". Services may log export warnings when the LGTM container is down; check in L04.
