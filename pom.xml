@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <!-- Spring Boot's parent gives every module tested library versions and plugin defaults. -->
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>4.1.1</version>
+        <relativePath/>
+    </parent>
+
+    <groupId>com.fintechdemo</groupId>
+    <artifactId>fintechdemo-parent</artifactId>
+    <version>0.1.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
+
+    <name>fintechdemo-parent</name>
+    <description>FINTECHDEMO P2P payments core - parent POM: modules, versions, plugins only</description>
+
+    <!-- Modules are added lesson by lesson (platform/platform-money arrives in L02). -->
+    <modules>
+    </modules>
+
+    <properties>
+        <java.version>25</java.version>
+        <required.java.range>[25,26)</required.java.range>
+        <required.maven.range>[3.9.9,)</required.maven.range>
+    </properties>
+
+    <build>
+        <plugins>
+            <!-- Fail fast on the wrong JDK or Maven, on Windows, macOS and CI alike. -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>enforce-build-environment</id>
+                        <goals>
+                            <goal>enforce</goal>
+                        </goals>
+                        <configuration>
+                            <rules>
+                                <requireJavaVersion>
+                                    <version>${required.java.range}</version>
+                                    <message>FINTECHDEMO builds on JDK 25 (LTS). macOS: brew install --cask temurin@25</message>
+                                </requireJavaVersion>
+                                <requireMavenVersion>
+                                    <version>${required.maven.range}</version>
+                                    <message>Use the Maven wrapper: ./mvnw (macOS) or .\mvnw.cmd (Windows).</message>
+                                </requireMavenVersion>
+                                <banDuplicatePomDependencyVersions/>
+                            </rules>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>

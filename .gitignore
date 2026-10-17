@@ -1,0 +1,29 @@
+# Build output
+target/
+*.class
+
+# Maven wrapper runs in only-script mode: no jar is committed
+.mvn/wrapper/maven-wrapper.jar
+
+# IDE and editor files
+.idea/
+*.iml
+.vscode/
+*.code-workspace
+
+# Operating system files
+.DS_Store
+Thumbs.db
+
+# Logs and JVM crash dumps
+*.log
+hs_err_pid*
+replay_pid*
+
+# Secrets - never commit
+.env
+*.pem
+*.key
+*.p12
+*.jks
+*service-account*.json
